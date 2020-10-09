@@ -10,6 +10,5 @@ gen
 package-lock.json
 
 # Project exclude paths
-/edge-drag-link/node_modules/
-/history/node_modules/
-/input-label/node_modules/
+node_modules/
+dist/
