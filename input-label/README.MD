@@ -17,4 +17,7 @@ const { value, oldLabel, fittingValue } = result;
 * `autoUpdate`: 是否自动更新label，默认true
 * `focusClear`: 是否在input获得焦点时清除现有label，默认true
 * `onFocus`: 获得焦点事件
+* `textOverflow`: 文本溢出后处理方式：`ellipsis` or `newline` 默认 `ellipsis`
+* `textEllipsis`: 文本溢出后ellipsis处理方式的后缀默认`...`
+* `padding`: 文本padding，计算文本溢出时使用，默认 0
 

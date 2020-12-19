@@ -1,10 +1,10 @@
-module.exports = (edge, model, {
+module.exports = (edge, model, graph, {
   width = 100,
   height = 20
 } = {}) => {
-  const { startPoint, endPoint } = model;
-  const bbox = edge.getBBox();
-  console.log(bbox, model);
+  let { startPoint, endPoint } = model;
+  startPoint = graph.getCanvasByPoint(startPoint.x, startPoint.y);
+  endPoint = graph.getCanvasByPoint(endPoint.x, endPoint.y);
   // 获取锚点横轴距离
   const distanceX = Math.abs(startPoint.x - endPoint.x);
   // 获取锚点纵轴距离

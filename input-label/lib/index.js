@@ -28,7 +28,7 @@ const create = parent => {
   return dom;
 };
 
-const newPromise = (node, dom, oldLabel, { autoUpdate }) => {
+const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding }) => {
   return new Promise(resolve => {
     const onBlur = () => {
       dom.removeEventListener('blur', onBlur);
@@ -37,11 +37,19 @@ const newPromise = (node, dom, oldLabel, { autoUpdate }) => {
         display: 'none'
       });
       const value = dom.value.trim();
-      const fittingValue = fittingString(value, getWidth(dom), parseFloat(getStyle(dom, 'fontSize', 14)));
+      const model = node.getModel();
+      let width = node.getKeyShape()?.attr('width') || model.size?.[0] || getWidth(dom);
+      width = width - padding * 2;
+      const fontSize = model.labelCfg?.style?.fontSize || parseFloat(getStyle(dom, 'fontSize', 14));
+      const fittingValue = textOverflow === 'ellipsis' ? fittingEllipsisString(value, width, fontSize, textEllipsis) : fittingString(value, width, fontSize);
       if (autoUpdate) {
         node.update({
           label: fittingValue,
-          history: false
+          history: false,
+          attr: {
+            ...(model.attr || {}),
+            realLabel: value
+          }
         });
       }
       resolve({
@@ -81,6 +89,27 @@ export const fittingString = (str, maxWidth, fontSize) => {
   return res;
 };
 
+export const fittingEllipsisString = (str, maxWidth, fontSize, ellipsis = '...') => {
+  const ellipsisLength = G6.Util.getTextSize(ellipsis, fontSize)[0];
+  let currentWidth = 0;
+  let res = str;
+  const pattern = new RegExp('[\u4E00-\u9FA5]+'); // distinguish the Chinese charactors and letters
+  str.split('').forEach((letter, i) => {
+    if (currentWidth > maxWidth - ellipsisLength) return;
+    if (pattern.test(letter)) {
+      // Chinese charactors
+      currentWidth += fontSize;
+    } else {
+      // get the width of single letter according to the fontSize
+      currentWidth += G6.Util.getLetterWidth(letter, fontSize);
+    }
+    if (currentWidth > maxWidth - ellipsisLength) {
+      res = `${str.substr(0, i)}${ellipsis}`;
+    }
+  });
+  return res;
+};
+
 export const addClass = (dom, name) => {
   const { className } = dom;
   const classList = className.split(' ');
@@ -103,7 +132,11 @@ export const showInput = async (node, {
   graph,
   autoUpdate = true,
   focusClear = true,
-  onFocus
+  onFocus,
+  textOverflow = 'ellipsis',
+  textEllipsis = '...',
+  padding = 0,
+  event
 } = {}) => {
   if (promise) {
     return promise;
@@ -117,13 +150,13 @@ export const showInput = async (node, {
   const typeHandler = require(`./${type}`);
   const typeAttr = typeHandler(node, model, graph);
   const customStyle = typeof style === 'function' ? style(type, typeAttr, node, model) : style;
-  const { label = '' } = model;
+  const label = model.attr.realLabel || model.label || '';
   removeClass(dom, upType);
   addClass(dom, type);
   upType = type;
   dom.value = label;
   if (typeof onFocus === 'function') {
-    await Reflect.apply(onFocus, dom, [node, label]);
+    await Reflect.apply(onFocus, dom, [node, label, event]);
   }
   if (focusClear) {
     node.update({
@@ -139,6 +172,6 @@ export const showInput = async (node, {
     ...customStyle
   });
   dom.focus && dom.focus();
-  promise = newPromise(node, dom, label, { autoUpdate, graph });
+  promise = newPromise(node, dom, label, { autoUpdate, graph, textOverflow, textEllipsis, padding});
   return promise;
 };

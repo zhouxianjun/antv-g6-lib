@@ -1,18 +1,17 @@
 {
   "name": "@alone-g6/input-label",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": false,
   "description": "g6 label 输入框",
-  "main": "index.js",
   "scripts": {
-    "lint": "vue-cli-service lint",
-    "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    "build": "vue-cli-service build --mode production --target lib ./lib/index.js --report",
+    "lint": "vue-cli-service lint"
   },
+  "main": "./dist/input-label.umd.min.js",
+  "typings": "types/index.d.ts",
   "files": [
-    "index.d.ts",
     "dist",
-    "types",
-    "index.js"
+    "types"
   ],
   "dependencies": {
     "@antv/dom-util": "^2.0.2",
@@ -20,32 +19,24 @@
     "lodash": "^4.17.19"
   },
   "devDependencies": {
-    "@babel/core": "^7.11.4",
-    "@babel/plugin-proposal-class-properties": "^7.10.4",
-    "@babel/plugin-proposal-optional-chaining": "^7.11.0",
-    "@babel/plugin-transform-runtime": "^7.11.0",
-    "@babel/polyfill": "^7.10.4",
-    "@babel/preset-env": "^7.11.0",
-    "@vue/cli-plugin-eslint": "^4.5.4",
-    "@vue/cli-service": "^4.5.4",
+    "@babel/plugin-proposal-optional-chaining": "^7.12.1",
+    "@vue/cli-plugin-babel": "~4.5.0",
+    "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-service": "~4.5.0",
+    "@vue/eslint-config-standard": "^5.1.2",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^7.1.5",
-    "cross-env": "^7.0.2",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
     "eslint-plugin-vue": "^6.2.2",
-    "html-webpack-plugin": "^3.2.0",
     "husky": "^4.2.5",
-    "jsdoc-to-markdown": "^6.0.1",
     "lint-staged": "^10.2.13",
+    "node-sass": "^4.14.1",
+    "sass-loader": "^10.0.3",
     "tern": "^0.24.3",
-    "vue-template-compiler": "^2.6.11",
-    "webpack": "^4.42.1",
-    "webpack-cli": "^3.3.11",
-    "webpack-dev-server": "^3.10.3"
+    "vue-template-compiler": "^2.6.11"
   },
   "keywords": [
     "antv",
@@ -54,5 +45,21 @@
     "label"
   ],
   "author": "Alone",
-  "license": "ISC"
+  "license": "ISC",
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "vue-cli-service lint",
+      "git add"
+    ],
+    "*.vue": [
+      "vue-cli-service lint",
+      "git add"
+    ]
+  }
 }
