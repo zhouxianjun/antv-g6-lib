@@ -34,13 +34,19 @@ const create = (parent, attr) => {
 
 const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding, validate }) => {
   return new Promise(resolve => {
-    const onBlur = () => {
+    const onBlur = async () => {
+      const value = dom.value.trim();
+      if (typeof validate === 'function') {
+        const res = await validate(value, node, dom);
+        if (res === false) {
+          return;
+        }
+      }
       dom.removeEventListener('blur', onBlur);
       dom.removeEventListener('keypress', onEnter);
       modifyCSS(dom, {
         display: 'none'
       });
-      const value = dom.value.trim();
       const model = node.getModel();
       let width = node.getKeyShape()?.attr('width') || model.size?.[0] || getWidth(dom);
       width = width - padding * 2;
@@ -63,14 +69,8 @@ const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsi
       });
       promise = null;
     };
-    const onEnter = async (e) => {
+    const onEnter = (e) => {
       if (e.keyCode === 13) {
-        if (typeof validate === 'function') {
-          const res = await validate(dom.value.trim(), dom);
-          if (res === false) {
-            return;
-          }
-        }
         onBlur();
       }
     };
