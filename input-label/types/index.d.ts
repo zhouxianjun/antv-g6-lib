@@ -8,11 +8,11 @@ interface ShowInputOptions {
   /**
    * input输入框父及dom，HTMLElement 或 Selector
    */
-  parent: HTMLElement | String,
+  parent?: HTMLElement | String,
   /**
    * input输入框样式
    */
-  style: Object,
+  style?: Object,
   /**
    * g6 实例
    */
@@ -20,15 +20,35 @@ interface ShowInputOptions {
   /**
    * 是否自动更新label，默认true
    */
-  autoUpdate: boolean,
+  autoUpdate?: boolean,
   /**
    * 是否在input获得焦点时清除现有label，默认true
    */
-  focusClear: boolean,
+  focusClear?: boolean,
   /**
    * 获得焦点事件
    */
-  onFocus: (node, label) => void
+  onFocus?: (node, label) => void,
+  /**
+   * 文本溢出方式，默认ellipsis
+   */
+  textOverflow?: string,
+  /**
+   * 文本溢出后省略后缀
+   */
+  textEllipsis?: string,
+  /**
+   * 文本内容内边距
+   */
+  padding?: number,
+  /**
+   * 输入框input属性
+   */
+  attr?: object | string,
+  /**
+   * 输入框回车验证函数，返回false则验证失败
+   */
+  validate?: Function
 }
 
 /**

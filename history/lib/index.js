@@ -76,7 +76,7 @@ class History extends PluginBase {
     return async (e) => {
       const {item} = e;
       const data = cloneDeep(this.graph.save());
-      const result = await Reflect.apply(showInput, this, [item, {graph: this.graph, ...config}]);
+      const result = await Reflect.apply(showInput, this, [item, {graph: this.graph, event: e, ...config}]);
       const { value, oldLabel } = result;
       if (value !== oldLabel) {
         this.push(data);

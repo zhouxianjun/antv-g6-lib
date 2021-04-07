@@ -12,7 +12,7 @@ let inputId;
 let promise;
 let upType;
 
-const create = parent => {
+const create = (parent, attr) => {
   let parentDom;
   if (parent) {
     if (parent instanceof HTMLElement) {
@@ -23,16 +23,20 @@ const create = parent => {
   }
   inputId = `${INPUT_ID_PRE}-${Date.now()}`;
   parentDom = parentDom || document.body;
-  const dom = createDom(`<input id="${inputId}" class="g6-edit-input" />`);
+  const attrStr = typeof attr === 'string' ? attr : '';
+  const dom = createDom(`<input id="${inputId}" class="g6-edit-input" ${attrStr} />`);
+  if (typeof attr !== 'string' && attr) {
+    Object.keys(attr).forEach(key => dom.setAttribute(key, attr[key]));
+  }
   parentDom.appendChild(dom);
   return dom;
 };
 
-const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding }) => {
+const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding, validate }) => {
   return new Promise(resolve => {
     const onBlur = () => {
       dom.removeEventListener('blur', onBlur);
-      dom.removeEventListener('keyup', onEnter);
+      dom.removeEventListener('keypress', onEnter);
       modifyCSS(dom, {
         display: 'none'
       });
@@ -59,13 +63,19 @@ const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsi
       });
       promise = null;
     };
-    const onEnter = (e) => {
+    const onEnter = async (e) => {
       if (e.keyCode === 13) {
+        if (typeof validate === 'function') {
+          const res = await validate(dom.value.trim(), dom);
+          if (res === false) {
+            return;
+          }
+        }
         onBlur();
       }
     };
     dom.addEventListener('blur', onBlur);
-    dom.addEventListener('keyup', onEnter);
+    dom.addEventListener('keypress', onEnter);
   });
 };
 
@@ -136,6 +146,8 @@ export const showInput = async (node, {
   textOverflow = 'ellipsis',
   textEllipsis = '...',
   padding = 0,
+  attr,
+  validate,
   event
 } = {}) => {
   if (promise) {
@@ -143,7 +155,7 @@ export const showInput = async (node, {
   }
   let dom = inputId ? document.querySelector(`input#${inputId}`) : null;
   if (!dom) {
-    dom = create(parent);
+    dom = create(parent, attr);
   }
   const model = node.getModel();
   const type = node.getType();
@@ -172,6 +184,6 @@ export const showInput = async (node, {
     ...customStyle
   });
   dom.focus && dom.focus();
-  promise = newPromise(node, dom, label, { autoUpdate, graph, textOverflow, textEllipsis, padding});
+  promise = newPromise(node, dom, label, { autoUpdate, graph, textOverflow, textEllipsis, padding, validate });
   return promise;
 };
