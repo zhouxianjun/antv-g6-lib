@@ -37,7 +37,8 @@ const getFittingValue = (node, dom, value, model, textOverflow, textEllipsis, pa
   width = width - padding * 2;
   const fontSize = model.labelCfg?.style?.fontSize || parseFloat(getStyle(dom, 'fontSize', 14));
   return textOverflow === 'ellipsis' ? fittingEllipsisString(value, width, fontSize, textEllipsis) : fittingString(value, width, fontSize);
-}
+};
+
 const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding, validate }) => {
   return new Promise(resolve => {
     const onBlur = async () => {
