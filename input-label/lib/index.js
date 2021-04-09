@@ -36,17 +36,18 @@ const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsi
   return new Promise(resolve => {
     const onBlur = async () => {
       const value = dom.value.trim();
-      if (typeof validate === 'function') {
-        const res = await validate(value, node, dom);
-        if (res === false) {
-          return;
-        }
-      }
       dom.removeEventListener('blur', onBlur);
       dom.removeEventListener('keypress', onEnter);
       modifyCSS(dom, {
         display: 'none'
       });
+      if (typeof validate === 'function') {
+        const res = await validate(value, node, dom);
+        if (res === false) {
+          resolve({ value: oldLabel, oldLabel, validate: false });
+          return;
+        }
+      }
       const model = node.getModel();
       let width = node.getKeyShape()?.attr('width') || model.size?.[0] || getWidth(dom);
       width = width - padding * 2;
@@ -148,12 +149,13 @@ export const showInput = async (node, {
   padding = 0,
   attr,
   validate,
-  event
+  event,
+  force
 } = {}) => {
-  if (promise) {
+  let dom = inputId ? document.querySelector(`input#${inputId}`) : null;
+  if (promise && dom && !force) {
     return promise;
   }
-  let dom = inputId ? document.querySelector(`input#${inputId}`) : null;
   if (!dom) {
     dom = create(parent, attr);
   }
@@ -187,3 +189,5 @@ export const showInput = async (node, {
   promise = newPromise(node, dom, label, { autoUpdate, graph, textOverflow, textEllipsis, padding, validate });
   return promise;
 };
+
+export const resetInput = () => promise = null;

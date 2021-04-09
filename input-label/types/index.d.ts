@@ -88,3 +88,5 @@ export declare function addClass(dom: HTMLElement | Element, name: string): void
  * @param name 样式名称
  */
 export declare function removeClass(dom: HTMLElement | Element, name: string): void;
+
+export declare function resetInput(): void;
