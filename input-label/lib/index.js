@@ -32,10 +32,16 @@ const create = (parent, attr) => {
   return dom;
 };
 
+const getFittingValue = (node, dom, value, model, textOverflow, textEllipsis, padding) => {
+  let width = node.getKeyShape()?.attr('width') || model.size?.[0] || getWidth(dom);
+  width = width - padding * 2;
+  const fontSize = model.labelCfg?.style?.fontSize || parseFloat(getStyle(dom, 'fontSize', 14));
+  return textOverflow === 'ellipsis' ? fittingEllipsisString(value, width, fontSize, textEllipsis) : fittingString(value, width, fontSize);
+}
 const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsis, padding, validate }) => {
   return new Promise(resolve => {
     const onBlur = async () => {
-      const value = dom.value.trim();
+      let value = dom.value.trim();
       dom.removeEventListener('blur', onBlur);
       dom.removeEventListener('keypress', onEnter);
       modifyCSS(dom, {
@@ -44,15 +50,11 @@ const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsi
       if (typeof validate === 'function') {
         const res = await validate(value, node, dom);
         if (res === false) {
-          resolve({ value: oldLabel, oldLabel, validate: false });
-          return;
+          value = oldLabel;
         }
       }
       const model = node.getModel();
-      let width = node.getKeyShape()?.attr('width') || model.size?.[0] || getWidth(dom);
-      width = width - padding * 2;
-      const fontSize = model.labelCfg?.style?.fontSize || parseFloat(getStyle(dom, 'fontSize', 14));
-      const fittingValue = textOverflow === 'ellipsis' ? fittingEllipsisString(value, width, fontSize, textEllipsis) : fittingString(value, width, fontSize);
+      const fittingValue = getFittingValue(node, dom, value, model, textOverflow, textEllipsis, padding);
       if (autoUpdate) {
         node.update({
           label: fittingValue,
@@ -63,12 +65,12 @@ const newPromise = (node, dom, oldLabel, { autoUpdate, textOverflow, textEllipsi
           }
         });
       }
+      promise = null;
       resolve({
         value,
         oldLabel,
         fittingValue
       });
-      promise = null;
     };
     const onEnter = (e) => {
       if (e.keyCode === 13) {
